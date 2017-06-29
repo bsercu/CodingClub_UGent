@@ -1,0 +1,198 @@
+---
+title: "What I wish I knew when I started using R"
+author: "Coding Club"
+date: "June 29, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+```
+
+## Trick 1: A proposition of workflow 
+
+1. Use R-projects within R-studio
+2. Use git and github (integrated in R-studio) to save versions of you scripts and enable to return to older versions within your project. On top of that github allow sharing and collaborating.
+3. Structure your project in a logical way eg.
+    3.1 folder 'data' that contains the raw data
+    3.2 one script to create usable datafiles from the raw data
+    3.3 one script (or a folder with scripts) that contains the functions you will be using often.
+    3.4 folder with R-notebooks to do your analysis and exploration. Every notebook starts with loading the required packages for the session and loading all datatables and functions using the source() command.
+    3.5 folder with output documents that can be ignored by git.
+
+[notebooks](http://rmarkdown.rstudio.com/r_notebooks.html):
+interactive coding that shows graphs and output from analyses between the code chunks.
+Automatically generates a nicely output in html format that can be sent to external people.
+
+Source: runs all the code from an r-file you call. 
+write as: source("name_of_R_script.R")
+
+
+## Trick 2: Using the tidyverse
+
+dplyr, tidyr, ggplot2, best tools to work with large datasets. Have a look at the many nice [cheatsheets](https://www.rstudio.com/resources/cheatsheets/).
+[tidyr](https://cran.r-project.org/web/packages/tidyr/index.html) make data tidy for using in [dplyr](https://cran.r-project.org/web/packages/dplyr/index.html), using this structure you can use [ggplot2](https://cran.r-project.org/web/packages/ggplot2/index.html), even in interactive mode with [plotly](https://plot.ly/ggplot2/). ggplot2 is the best for data exploration. For publication-ready figures base plot function may be better.
+
+## Trick 3: The predict function
+
+You fitted a model and you want to get the model predicted values.
+
+```{r}
+dat <- data.frame(x=runif(100,-2,2))
+dat$y <- rnorm(100,1+2*dat$x,1)
+m <- lm(y~x,dat)
+
+#before
+pred <- coef(m)[1] + coef(m)[2]*dat$x
+
+#after
+pred_p <- predict(m)
+pred == pred_p
+```
+
+## Trick 4: Create functions
+
+Create functions when using always the same code. Example with a plotting function to plot (ggplot2) specific columns in a dataframe.
+Learned through googling and [stackoverflow](https://stackoverflow.com/questions/tagged/r), we will have a session on this coming soon!
+
+```{r}
+visvar <- function(Var,data){
+  g <- ggplot(data,aes_string(x="Treatment",y=Var))+geom_boxplot()
+  return(g)
+}
+
+dat <- data.frame(Treatment=gl(n = 3,k = 10),Value=rnorm(30))
+visvar("Value",dat)
+```
+
+We continued with a discussion of using for-loops, see [this](https://www.r-bloggers.com/how-to-write-the-first-for-loop-in-r/) blog post, but [beware](https://biologyforfun.wordpress.com/2013/02/13/the-day-i-stoped-using-for-loops-in-r/) of efficiency issues, one could also use the __ply functions (see ?apply, ?plyr etc)
+
+## Trick 5: Vectorization
+
+R automatically does operations on entire vectors.
+
+```{r}
+x <- rep(1,10)
+y <- rep(2,10)
+
+#without vectorization
+for(i in 1:10) print(x[i] + y[i])
+
+#with vectorization
+x + y
+
+#beware of internal R tricks
+x + c(1,2)
+x + c(1,2,3)
+```
+
+## Trick 6: Ifelse
+
+A useful function, return specific values depending on a logical statement.
+This is a vectorized if...else statement which is faster than writing a loop.
+
+```{r}
+x<-runif(10,-2,2)
+ifelse(x<0,"Yes","No")
+```
+
+## Trick 7: Functions as object
+
+Functions are object like everything else and can be passed around, like functions within functions, more on this in a further session.
+
+```{r}
+f <- function(n){
+  return(rep(10,n))
+}
+f(10) + 1
+```
+
+## Trick 8: Logical statement as numbers
+
+In R you can compute stuff from logical, for instance if you want to count how many element in a vector are bigger than 10 you can use:
+
+```{r}
+(x<-rpois(10,10))
+sum(x>10)
+```
+
+## Trick 9: expand.grid
+
+This function will generated a data frame repeating all values of one variables against all values of another variables (like in a fully factorial design).
+
+```{r}
+(newdat <- expand.grid(Treatment=c("Low","Medium","High"),Light=1:10))
+```
+
+## Trick 10: model.matrix
+
+This is a similar function that gives you the model matrix from a formula, very useful if you want to go deeper into simulations and understanding of linear models.
+
+```{r}
+dat <- data.frame(Treatment=gl(n = 3,k=10),Light=runif(30))
+(modmat <- model.matrix(~Treatment*Light,dat))
+```
+
+## Trick 11: shinyHeatmaply
+
+Have a look at [this package](https://www.r-statistics.com/2017/03/shinyheatmaply-a-shiny-app-for-creating-interactive-cluster-heatmaps/) for interactive construction of heatmaps.
+
+Other option for similar plots pairs.panels in the psych package or corrplot in the [corrplot](https://cran.r-project.org/web/packages/corrplot/index.html) package
+
+```{r message=FALSE}
+#example 1 with psych
+library(psych)
+pairs.panels(matrix(rnorm(100),ncol=10))
+```
+
+```{r}
+#example with corrplot
+library(corrplot)
+corrplot(matrix(rnorm(100),ncol=10),is.corr=FALSE)
+```
+
+## Trick 12: with
+
+Please [don't use attach](https://www.r-bloggers.com/to-attach-or-not-attach-that-is-the-question/)! Use rather the with function which tells R where to look for some variables, it avoids you to use $ or [].
+
+```{r}
+dat <- data.frame(x=rnorm(10),y=rnorm(10))
+with(dat,cor(x,y))
+```
+
+## Trick 13: by
+
+Apply a function to chuncks of data, similar to tapply, dplyr and others ...
+
+```{r}
+dat <- data.frame(x=rnorm(30),y=rnorm(30),Treatment=gl(n = 3,k = 10))
+#get the maximum from the x column
+by(dat$x,dat$Treatment,max)
+#get the mean per treatment 
+by(dat[,1:2],dat$Treatment,function(x) apply(x,2,mean))
+```
+
+
+## Trick 14: Quickly update your models
+
+From a fitted model you can easily remove (-) or add (+) variables and compute a new model, all in one line. Update works this way: (i) provide a fitted model (model_1), (ii) specify how the model formula should change, you can use the symbol "." which means "all variables".
+
+```{r}
+dat <- data.frame(x1=rnorm(10),x2=rnorm(10), x3=rnorm(10), x4=rnorm(10), y=rnorm(10) )
+F1 <- formula(y ~ x1 + x2 +x3)
+model_1 <- lm(F1, data=dat)
+# you can add or remove variables from the object with 'update()'
+model_2 <- update(model_1,.~.-x3)
+model_3 <- update(model_1,.~.+x4)
+
+summary(model_1)
+summary(model_2)
+summary(model_3)
+```
+
+# For the next session
+
+Talk from Frederik: About loops and functions (20min) + exercise
+
+Further session from Bram: How to make your code more efficient
