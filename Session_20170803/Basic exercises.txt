@@ -1,0 +1,10 @@
+For loop
+Search a genetic vector for all start codons
+
+
+While loop
+Print the genetic code following the first start codon until the next stop codon
+
+
+function
+Function that takes whatever genetic sequence and returns the codons from the start codon to the first stop codon
