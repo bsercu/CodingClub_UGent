@@ -1,0 +1,175 @@
+---
+title: "Coding club: loops and functions"
+output: html_notebook
+---
+
+
+#IF - THEN
+
+Is someone welcome at a party?
+```{r}
+list <- c("Dries", "Irene", "Bram")
+person <- "Dries"
+
+person %in% list
+
+if (person %in% list){
+  print("Welcome! :)")
+}
+```
+  
+
+
+
+
+
+
+
+#IF - THEN - ELSE
+
+
+```{r}
+list <- c("Dries", "Irene", "Bram")
+person <- "Frederik"
+
+if (person %in% list){
+  print("Welcome! :)")
+} else {
+  print("Not on the list! :(")
+}
+```
+  
+
+
+
+
+
+
+
+
+#Loops: repeat an action
+
+
+```{r}
+print("Welcome!")
+print("Welcome!")
+print("Welcome!")
+```
+  
+
+
+###For loops: ... for fixed number of iterations
+
+
+Welcome 3 guests on list
+```{r}
+seq(3)
+
+for (x in seq(3)) {
+  print('Welcome')
+}
+
+```
+  
+  
+  
+  
+  
+  
+  
+  
+Welcome each person on the list
+```{r}
+for (x in list) {
+  print('Welcome')
+}
+
+
+paste('coding', 'club')
+
+for (x in list) {
+  print(paste('Welcome,', x))
+}
+```
+ 
+
+###While loops: ... for a conditional amount of iterations
+
+Welcome guests as long as they are on the list
+```{r}
+guests <- c('Bram', 'Irene', 'Lionel')
+
+n <- 1
+while (guests[n]%in%list) {
+  print(paste('Welcome,', guests[n]))
+  n<-n+1
+}
+
+guests[4]
+guests[4]%in%list
+```
+  
+
+
+
+
+
+#Functions: group a unit of actions that process input in order to acquire output
+
+```{r}
+greet <- function(name){
+  
+  if (name %in% list){
+  print(paste('Welcome,', name))
+  
+    } else {
+  print('move along')
+  }
+  
+}
+
+greet('Dries')
+greet('Frederik')
+```
+
+
+
+
+
+
+
+```{r}
+on_list <- function(name){
+  return (name %in% list)
+}
+
+if (on_list('Lionel')) {
+  print('Welcome')
+} else {
+  print('Move along')
+}
+```
+
+
+
+
+
+
+
+```{r}
+greet <- function(name, guestlist){
+  
+  if (name %in% guestlist){
+  print(paste('Welcome,', name))
+  } else {
+  print('move along')
+  }
+
+}
+
+greet('Lionel', list)
+greet('Lionel', c("Dries", "Irene", "Bram", "Lionel"))
+```
+
+
+
